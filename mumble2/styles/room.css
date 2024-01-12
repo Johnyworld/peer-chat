@@ -181,6 +181,7 @@
   border-radius: 0;
   height: 100% !important;
   width: 100% !important;
+  background-size: 200px;
 }
 
 #stream__box video {
@@ -207,6 +208,10 @@
   overflow: hidden;
   height: 300px;
   width: 300px;
+  background-image: url('/mumble2/images/logo.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 75px;
 }
 
 .video-player {
