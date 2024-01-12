@@ -30,3 +30,44 @@ chatButton.addEventListener('click', () => {
 
   activeChatContainer = !activeChatContainer;
 });
+
+const displayFrame = document.getElementById('stream__box');
+const videoFrames = document.getElementsByClassName('video__container');
+let userIdInDisplayFrame = null;
+
+const expandVideoFrame = e => {
+  const child = displayFrame.children[0];
+  if (child) {
+    document.getElementById('streams__container').appendChild(child);
+  }
+
+  displayFrame.style.display = 'block';
+  displayFrame.appendChild(e.currentTarget);
+  userIdInDisplayFrame = e.currentTarget.id;
+
+  for (let i = 0; i < videoFrames.length; i++) {
+    if (videoFrames[i].id != userIdInDisplayFrame) {
+      videoFrames[i].style.height = '100px';
+      videoFrames[i].style.width = '100px';
+    }
+  }
+};
+
+for (let i = 0; i < videoFrames.length; i++) {
+  videoFrames[i].addEventListener('click', expandVideoFrame);
+}
+
+const hideDisplayFrame = () => {
+  userIdInDisplayFrame = null;
+  displayFrame.style.display = null;
+
+  const child = displayFrame.children[0];
+  document.getElementById('streams__container').appendChild(child);
+
+  for (let i = 0; i < videoFrames.length; i++) {
+    videoFrames[i].style.height = '300px';
+    videoFrames[i].style.width = '300px';
+  }
+};
+
+displayFrame.addEventListener('click', hideDisplayFrame);

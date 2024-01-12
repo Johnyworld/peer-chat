@@ -166,7 +166,6 @@
   width: calc(100% - 40.7rem);
   position: fixed;
   left: 15.7rem;
-  top: clac(100vh - 72px);
   overflow-y: auto;
   height: 100%;
 }
@@ -175,6 +174,17 @@
   background-color: #3f434a;
   height: 60vh;
   display: none;
+}
+
+#stream__box .video__container {
+  border: 2px solid #000;
+  border-radius: 0;
+  height: 100% !important;
+  width: 100% !important;
+}
+
+#stream__box video {
+  border-radius: 0;
 }
 
 #streams__container {
