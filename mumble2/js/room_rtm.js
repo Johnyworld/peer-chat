@@ -6,6 +6,7 @@ const handleMemberJoined = async MemberId => {
   updateMemberTotal(members);
 
   const { name } = await rtmClient.getUserAttributesByKeys(MemberId, ['name']);
+  addBotMessageToDom(`Welcome to the room ${name}! 👋🏻`);
 };
 
 const addMemberToDom = async MemberId => {
@@ -34,6 +35,9 @@ const handleMemberLeft = async MemberId => {
 
 const removeMemberFromDom = async MemberId => {
   const memberWrapper = document.getElementById(`member__${MemberId}__wrapper`);
+  const name = memberWrapper.getElementsByClassName('member_name')[0].textContent;
+  addBotMessageToDom(`${name} has left the room.`);
+
   memberWrapper.remove();
 };
 
@@ -69,6 +73,24 @@ const addMessageToDom = (name, message) => {
     <div class="message__body">
       <strong class="message__author">${name}</strong>
       <p class="message__text">${message}</p>
+    </div>
+  </div>`;
+
+  messagesWrapper.insertAdjacentHTML('beforeend', newMessage);
+
+  const lastMessage = document.querySelector('#messages .message__wrapper:last-child');
+  if (lastMessage) {
+    lastMessage.scrollIntoView();
+  }
+};
+
+const addBotMessageToDom = botMessage => {
+  const messagesWrapper = document.getElementById('messages');
+
+  const newMessage = `<div class="message__wrapper">
+    <div class="message__body__bot">
+      <strong class="message__author__bot">🤖 Mumble Bot</strong>
+      <p class="message__text__bot">${botMessage}</p>
     </div>
   </div>`;
 
