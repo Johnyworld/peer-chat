@@ -22,6 +22,7 @@ const init = async () => {
   await channel.join();
 
   channel.on('MemberJoined', handleUserJoined);
+  channel.on('MemberLeft', handleUserLeft);
 
   client.on('MessageFromPeer', handleMessageFromPeer);
 
@@ -29,9 +30,26 @@ const init = async () => {
   document.getElementById('user-1').srcObject = localStream;
 };
 
+const handleUserLeft = MemberId => {
+  document.getElementById('user-2').style.display = 'none';
+};
+
 const handleMessageFromPeer = async (message, MemberId) => {
   message = JSON.parse(message.text);
-  console.log('Message: ', message);
+
+  if (message.type === 'offer') {
+    createAnswer(MemberId, message.offer);
+  }
+
+  if (message.type === 'answer') {
+    addAnswer(message.answer);
+  }
+
+  if (message.type === 'candidate') {
+    if (peerConnection) {
+      peerConnection.addIceCandidate(message.candidate);
+    }
+  }
 };
 
 const handleUserJoined = async MemberId => {
@@ -39,11 +57,12 @@ const handleUserJoined = async MemberId => {
   createOffer(MemberId);
 };
 
-const createOffer = async MemberId => {
+const createPeerConnection = async MemberId => {
   peerConnection = new RTCPeerConnection(servers);
 
   remoteStream = new MediaStream();
   document.getElementById('user-2').srcObject = remoteStream;
+  document.getElementById('user-2').style.display = 'block';
 
   if (!localStream) {
     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
@@ -55,8 +74,8 @@ const createOffer = async MemberId => {
   });
 
   peerConnection.ontrack = event => {
-    event.streams[0].getTrack().forEach(track => {
-      remoteStream.addTrack();
+    event.streams[0].getTracks().forEach(track => {
+      remoteStream.addTrack(track);
     });
   };
 
@@ -65,11 +84,38 @@ const createOffer = async MemberId => {
       client.sendMessageToPeer({ text: JSON.stringify({ type: 'candidate', candidate: event.candidate }) }, MemberId);
     }
   };
+};
 
+const createOffer = async MemberId => {
+  await createPeerConnection(MemberId);
   const offer = await peerConnection.createOffer();
   await peerConnection.setLocalDescription(offer);
 
   client.sendMessageToPeer({ text: JSON.stringify({ type: 'offer', offer }) }, MemberId);
 };
+
+const createAnswer = async (MemberId, offer) => {
+  await createPeerConnection(MemberId);
+
+  await peerConnection.setRemoteDescription(offer);
+
+  const answer = await peerConnection.createAnswer();
+  await peerConnection.setLocalDescription(answer);
+
+  client.sendMessageToPeer({ text: JSON.stringify({ type: 'answer', answer }) }, MemberId);
+};
+
+const addAnswer = async answer => {
+  if (!peerConnection.currentRemoteDescription) {
+    peerConnection.setRemoteDescription(answer);
+  }
+};
+
+const leaveChannel = async MemberId => {
+  await channel.leave();
+  await client.logout();
+};
+
+window.addEventListener('beforeunload', leaveChannel);
 
 init();
