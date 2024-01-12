@@ -22,6 +22,14 @@ const servers = {
   iceServers: [{ urls: ['stun:stun1.l.google.com:19032', 'stun:stun2.l.google.com:19032'] }],
 };
 
+const constraints = {
+  video: {
+    width: { min: 640, ideal: 1920, max: 1920 },
+    height: { min: 480, ideal: 1080, max: 1080 },
+  },
+  audio: true,
+};
+
 const init = async () => {
   client = await AgoraRTM.createInstance(APP_ID);
   await client.login({ uid, token });
@@ -34,7 +42,7 @@ const init = async () => {
 
   client.on('MessageFromPeer', handleMessageFromPeer);
 
-  localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+  localStream = await navigator.mediaDevices.getUserMedia(constraints);
   document.getElementById('user-1').srcObject = localStream;
 };
 
