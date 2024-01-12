@@ -52,8 +52,13 @@ const getMembers = async () => {
 const handleChannelMessage = async (messageData, MemberId) => {
   console.log('A new message was received');
   const data = JSON.parse(messageData.text);
+
   if (data.type === 'chat') {
     addMessageToDom(data.displayName, data.message);
+  }
+
+  if (data.type === 'user_left') {
+    document.getElementById(`user-container-${data.uid}`).remove();
   }
 };
 
