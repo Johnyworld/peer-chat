@@ -4,6 +4,8 @@ const handleMemberJoined = async MemberId => {
 
   const members = await channel.getMembers();
   updateMemberTotal(members);
+
+  const { name } = await rtmClient.getUserAttributesByKeys(MemberId, ['name']);
 };
 
 const addMemberToDom = async MemberId => {
@@ -43,9 +45,46 @@ const getMembers = async () => {
   }
 };
 
+const handleChannelMessage = async (messageData, MemberId) => {
+  console.log('A new message was received');
+  const data = JSON.parse(messageData.text);
+  if (data.type === 'chat') {
+    addMessageToDom(data.displayName, data.message);
+  }
+};
+
+const sendMessage = async e => {
+  e.preventDefault();
+
+  const message = e.target.message.value;
+  channel.sendMessage({ text: JSON.stringify({ type: 'chat', message, displayName }) });
+  addMessageToDom(displayName, message);
+  e.target.reset();
+};
+
+const addMessageToDom = (name, message) => {
+  const messagesWrapper = document.getElementById('messages');
+
+  const newMessage = `<div class="message__wrapper">
+    <div class="message__body">
+      <strong class="message__author">${name}</strong>
+      <p class="message__text">${message}</p>
+    </div>
+  </div>`;
+
+  messagesWrapper.insertAdjacentHTML('beforeend', newMessage);
+
+  const lastMessage = document.querySelector('#messages .message__wrapper:last-child');
+  if (lastMessage) {
+    lastMessage.scrollIntoView();
+  }
+};
+
 const leaveChannel = async () => {
   await channel.leave();
   await rtmClient.logout();
 };
 
 window.addEventListener('beforeunload', leaveChannel);
+const messageForm = document.getElementById('message__form');
+messageForm.addEventListener('submit', sendMessage);
